@@ -4,7 +4,7 @@ require('dotenv').config()
 const { Command, Option } = require('commander')
 const axios = require('axios')
 const program = new Command()
-const environment = 'https://api.truework-sandbox.com'
+let environment = 'https://api.truework-sandbox.com'
 const TOKEN = process.env.TW_TOKEN
 
 program
