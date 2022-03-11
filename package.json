@@ -8,7 +8,8 @@
   "dependencies": {
     "axios": "^0.26.1",
     "commander": "^9.0.0",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "inquirer": "^8.2.1"
   },
   "bin": {
     "trueworkcli": "./index.js"

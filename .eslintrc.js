@@ -3,7 +3,7 @@ module.exports = {
         'es2021': true,
         'node': true
     },
-    'extends': 'eslint:recommended',
+    'extends': ['eslint:recommended',  "plugin:prettier/recommended"],
     'parserOptions': {
         'ecmaVersion': 'latest',
         'sourceType': 'module'
@@ -11,7 +11,7 @@ module.exports = {
     'rules': {
         'indent': [
             'error',
-            4
+            2
         ],
         'linebreak-style': [
             'error',
