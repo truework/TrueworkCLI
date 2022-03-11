@@ -1,0 +1,22 @@
+{
+  "name": "trueworkCLI",
+  "version": "1.0.0",
+  "description": "Truework CLI",
+  "main": "index.js",
+  "author": "Felix Sargent",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "commander": "^9.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "scripts": {
+    "format": "prettier-eslint \"src/**/*.js\""
+  },
+  "devDependencies": {
+    "eslint": "^8.10.0",
+    "prettier": "^2.5.1",
+    "prettier-eslint": "^13.0.0",
+    "prettier-eslint-cli": "^5.0.1"
+  }
+}
