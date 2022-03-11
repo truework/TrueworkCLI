@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 require('dotenv').config()
 const { Command, Option } = require('commander')
 const axios = require('axios')
@@ -64,11 +66,10 @@ verifications
                 Accept: 'application/json',
                 'Content-Type': 'application/json;charset=UTF-8',
                 Authorization: `Bearer ${TOKEN}`,
-
             },
         })
             .then(({ data }) => {
-                console.log(data)
+                console.dir(data, { depth: null, colors: true })
             })
             .catch((err) => {
                 if (err.response.status === 400) {
@@ -82,15 +83,20 @@ verifications
 verifications
     .command('create')
     .description('Create Verification')
-    // .argument('[instant] [credentials] [smart_outreach]')
     .addOption(
-        new Option('--type <type>','Request type').choices([
-            'employment-income',
-            'employment'
-        ]).default('employment')
+        new Option('--method <method>', 'Verification Method').choices(
+            ['instant','credentials','smart_outreach'])
     )
     .addOption(
-        new Option('--purpose <purpose>','A valid purpose is required for Truework to process the verification request.').choices([
+        new Option('--type <type>', 'Request type')
+            .choices(['employment-income', 'employment'])
+            .default('employment')
+    )
+    .addOption(
+        new Option(
+            '--purpose <purpose>',
+            'A valid purpose is required for Truework to process the verification request.'
+        ).choices([
             'child-support',
             'credit-application',
             'employee-eligibility',
@@ -104,23 +110,21 @@ verifications
             'subpoena',
         ])
     )
-
-    .requiredOption('-f, --first-name <first_name>', 'First Name')
-    .requiredOption('-l, --last-name <last_name>', 'Last Name')
+    .requiredOption('-f, --first_name <first_name>', 'First Name')
+    .requiredOption('-l, --last_name <last_name>', 'Last Name')
     .requiredOption('--ssn <ssn>', 'Social Security Number')
     .requiredOption('-c, --company <company>', 'Company Name')
-
     .option('--email [email]', 'Email')
     .option('--phone [phone]', 'Phone')
     .action((options, cmd) => {
-        console.log(options)
+    // console.log(options)
         let verification = {
             type: options.type,
             permissible_purpose: options.purpose,
             target: {
                 social_security_number: options.ssn,
                 company: {
-                    name: options.company
+                    name: options.company,
                 },
                 first_name: options.first_name,
                 last_name: options.last_name,
@@ -139,9 +143,18 @@ verifications
                 },
             },
         }
-        if (options.instant) { verification.request_parameters.verification_methods.instant.enabled = true }
-        if (options.credentials) { verification.request_parameters.verification_methods.credentials.enabled = true }
-        if (options.smart_outreach) { verification.request_parameters.verification_methods.smart_outreach.enabled = true }
+        if (options.method == 'instant') {
+            verification.request_parameters.verification_methods.instant.enabled = true
+        }
+        if (options.method == 'credentials') {
+            verification.request_parameters.verification_methods.credentials.enabled = true
+        }
+        if (options.smart_outreach == 'smart_outreach') {
+            verification.request_parameters.verification_methods.smart_outreach.enabled = true
+        }
+        if (cmd.optsWithGlobals().verbose) {
+            console.dir(verification, { depth: null, colors: true })
+        }
 
         axios({
             method: 'post',
@@ -154,10 +167,10 @@ verifications
             },
         })
             .then(({ data }) => {
-                console.log(data)
+                console.dir(data, { depth: null, colors: true })
             })
             .catch((err) => {
-                console.error(err.response.status)
+                console.dir(err.response.data, { depth: null, colors: true })
             })
     })
 
@@ -192,6 +205,6 @@ program
 
 program.parse()
 
-if( program.opts().production == true) {
+if (program.opts().production == true) {
     environment = 'https://api.truework.com/'
-} 
+}
