@@ -15,8 +15,6 @@ const mainPrompt = () => {
           'Create a new verification request',
           'Get a list of verification requests',
           'Get a verification request',
-          'Update a verification request',
-          'Delete a verification request',
         ],
       },
     ])
@@ -26,7 +24,7 @@ const mainPrompt = () => {
           createPrompt()
           break
         case 'Get a list of verification requests':
-          listVerifications({})
+          listVerifications({}, {})
           break
         case 'Get a verification request':
           inquirer
@@ -38,16 +36,12 @@ const mainPrompt = () => {
               },
             ])
             .then((answers) => {
-              getVerification(answers.verification_id)
+              getVerification(answers.verification_id, {}, {})
             })
       }
     })
     .catch((error) => {
-      if (error.isTtyError) {
-        console.error(error)
-      } else {
-        console.error(error)
-      }
+      console.error(error)
     })
 }
 
@@ -133,10 +127,10 @@ createPrompt = () => {
       if (answers.dob) {
         options.dob = answers.dob
       }
-      createVerification(options)
+      createVerification(options, {})
     })
     .catch((error) => {
-        console.error(error)
+      console.error(error)
     })
 }
 

@@ -1,12 +1,14 @@
 let environment = 'https://api.truework-sandbox.com'
 const axios = require('axios')
+var term = require('terminal-kit').terminal
+const moment = require('moment')
 
 let TOKEN = process.env.TW_TOKEN
 
 const getVerification = (verification_id, options, cmd) => {
   if (cmd.optsWithGlobals().production == true) {
-    environment = 'https://api.truework.com';
-    TOKEN = process.env.TW_TOKEN_PROD;
+    environment = 'https://api.truework.com'
+    TOKEN = process.env.TW_TOKEN_PROD
   }
   axios({
     method: 'get',
@@ -18,10 +20,15 @@ const getVerification = (verification_id, options, cmd) => {
     },
   })
     .then(({ data }) => {
-      console.dir(data, { depth: null, colors: true })
+      if (cmd.optsWithGlobals().verbose) {
+        console.log(cmd.optsWithGlobals())
+        console.dir(data, { depth: null, colors: true })
+      } else {
+        prettyPrintVerification(data)
+      }
     })
     .catch((err) => {
-      if (err.response.status === 400) {
+      if (err.status === 400) {
         console.log(`Verification ${verification_id} not found`)
       } else {
         console.error(err)
@@ -30,10 +37,13 @@ const getVerification = (verification_id, options, cmd) => {
 }
 
 const listVerifications = (options, cmd) => {
-  if (cmd.optsWithGlobals().production == true) {
-    environment = 'https://api.truework.com';
-    TOKEN = process.env.TW_TOKEN_PROD;
+  if (cmd.optsWithGlobals) {
+    if (cmd.optsWithGlobals().production == true) {
+      environment = 'https://api.truework.com'
+      TOKEN = process.env.TW_TOKEN_PROD
+    }
   }
+
   params = {
     limit: options.limit || 10,
     offset: options.offset || 0,
@@ -50,12 +60,14 @@ const listVerifications = (options, cmd) => {
     },
   })
     .then(({ data, config }) => {
-      if (cmd.optsWithGlobals().verbose) {
-        console.log(config);
-        console.log(cmd.optsWithGlobals());
-        console.dir(data, { depth: null, colors: true })
-      } else {
-        prettyPrintList(data.results)
+      if (cmd.optsWithGlobals) {
+        if (cmd.optsWithGlobals().verbose) {
+          console.log(config)
+          console.log(cmd.optsWithGlobals())
+          console.dir(data, { depth: null, colors: true })
+        } else {
+          prettyPrintVerification(data.results)
+        }
       }
     })
     .catch((err) => {
@@ -63,21 +75,65 @@ const listVerifications = (options, cmd) => {
     })
 }
 
-const prettyPrintList = (list) => {
+const prettyPrintVerification = (list) => {
+  if (list.id) {
+    list = [list]
+  }
+  // console.dir(list, { depth: null, colors: true })
   list.forEach((item) => {
-    console.log(
-      `${item.target.first_name} ${item.target.last_name}
-      SSN: ${item.target.social_security_number} Company: ${item.target.company.name}
-      Verification ID: ${item.id}
-      Status: ${item.state}`
+    term.bold(`${item.target.first_name} ${item.target.last_name}\n`)
+    term(
+      `\tSSN: ${item.target.social_security_number} Company: ${item.target.company.name}\n`
     )
+    term(`\tVerification ID: ${item.id}\n`)
+    if (item.reports) {
+      item.reports.forEach((report) => {
+        prettyPrintReport(report)
+      })
+    }
+    if (item.state === 'processing') {
+      term.brightYellow(`\tStatus: ${item.state}\n`)
+    } else if (item.state === 'completed') {
+      term.green(`\tStatus: ${item.state}\n`)
+    } else {
+      term(`\tStatus: ${item.state}\n`)
+    }
+    term.bold(`\tCreated: `)
+    term(`${moment(item.created).format('LLLL')} `)
+    if (item.date_of_completion) {
+      term.bold(`Completed: `)
+      term(`${moment(item.date_of_completion).format('LLLL')}, `)
+      term.bold(`Time Elapsed: `)
+      term(
+        `${moment(item.date_of_completion).diff(
+          moment(item.created),
+          'minutes'
+        )}m\n`
+      )
+    } else {term(`\n`)}
   })
+}
+
+const prettyPrintReport = (report) => {
+  term.bold(`\tEmployer Name: ${report.employer.name}\n`)
+  term(`\t\tEmployee Status: ${report.employee.status}\n`)
+  term(`\t\tEmployee Hired Date: ${report.employee.hired_date}\n`)
+  if (report.employee.positions.length > 0) {
+    report.employee.positions.forEach((position) => {
+      term(`\t\tEmployee Position: ${position.title} @ ${position.start_date}`)
+      if (position.end_date) {
+        term(` - ${position.end_date}\n`)
+      } else {
+        term(`\n`)
+      }
+    })
+  }
 }
 
 const createVerification = (options, cmd) => {
   if (cmd.optsWithGlobals().production == true) {
-    environment = 'https://api.truework.com';
-    TOKEN = process.env.TW_TOKEN_PROD;
+    environment = 'https://api.truework.com'
+    TOKEN = process.env.TW_TOKEN_PROD
   }
   let verification = {
     type: options.type,
@@ -141,8 +197,8 @@ const createVerification = (options, cmd) => {
 
 const getCompany = (company_name, options, cmd) => {
   if (cmd.optsWithGlobals().production == true) {
-    environment = 'https://api.truework.com';
-    TOKEN = process.env.TW_TOKEN_PROD;
+    environment = 'https://api.truework.com'
+    TOKEN = process.env.TW_TOKEN_PROD
   }
   axios({
     method: 'get',
