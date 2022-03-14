@@ -1,9 +1,13 @@
 let environment = 'https://api.truework-sandbox.com'
 const axios = require('axios')
 
-const TOKEN = process.env.TW_TOKEN
+let TOKEN = process.env.TW_TOKEN
 
-const getVerification = (verification_id) => {
+const getVerification = (verification_id, options, cmd) => {
+  if (cmd.optsWithGlobals().production == true) {
+    environment = 'https://api.truework.com';
+    TOKEN = process.env.TW_TOKEN_PROD;
+  }
   axios({
     method: 'get',
     url: `${environment}/verification-requests/${verification_id}`,
@@ -26,6 +30,10 @@ const getVerification = (verification_id) => {
 }
 
 const listVerifications = (options, cmd) => {
+  if (cmd.optsWithGlobals().production == true) {
+    environment = 'https://api.truework.com';
+    TOKEN = process.env.TW_TOKEN_PROD;
+  }
   params = {
     limit: options.limit || 10,
     offset: options.offset || 0,
@@ -42,18 +50,35 @@ const listVerifications = (options, cmd) => {
     },
   })
     .then(({ data, config }) => {
-      // if (cmd.optsWithGlobals().verbose) {
-      //   console.log(config);
-      //   console.log(cmd.optsWithGlobals());
-      // }
-      console.dir(data, { depth: null, colors: true })
+      if (cmd.optsWithGlobals().verbose) {
+        console.log(config);
+        console.log(cmd.optsWithGlobals());
+        console.dir(data, { depth: null, colors: true })
+      } else {
+        prettyPrintList(data.results)
+      }
     })
     .catch((err) => {
       console.error(err)
     })
 }
 
-const createVerification = (options) => {
+const prettyPrintList = (list) => {
+  list.forEach((item) => {
+    console.log(
+      `${item.target.first_name} ${item.target.last_name}
+      SSN: ${item.target.social_security_number} Company: ${item.target.company.name}
+      Verification ID: ${item.id}
+      Status: ${item.state}`
+    )
+  })
+}
+
+const createVerification = (options, cmd) => {
+  if (cmd.optsWithGlobals().production == true) {
+    environment = 'https://api.truework.com';
+    TOKEN = process.env.TW_TOKEN_PROD;
+  }
   let verification = {
     type: options.type,
     permissible_purpose: options.purpose,
@@ -102,7 +127,11 @@ const createVerification = (options) => {
     },
   })
     .then(({ data }) => {
-      console.dir(data, { depth: null, colors: true })
+      if (cmd.optsWithGlobals().verbose) {
+        console.dir(data, { depth: null, colors: true })
+      } else {
+        prettyPrintList(data.results)
+      }
     })
     .catch((err) => {
       console.dir(verification, { depth: null, colors: true })
@@ -110,7 +139,11 @@ const createVerification = (options) => {
     })
 }
 
-const getCompany = (company_name, options) => {
+const getCompany = (company_name, options, cmd) => {
+  if (cmd.optsWithGlobals().production == true) {
+    environment = 'https://api.truework.com';
+    TOKEN = process.env.TW_TOKEN_PROD;
+  }
   axios({
     method: 'get',
     url: `${environment}/companies`,

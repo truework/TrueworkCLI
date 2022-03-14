@@ -6,16 +6,19 @@ const { mainPrompt } = require('./inquirer');
 const {createVerification, getCompany, getVerification, listVerifications} = require('./twapi');
 const program = new Command();
 
+if (!process.env.TW_TOKEN) {
+    console.error('TW_TOKEN environment variable is not set\nPlease define one in .env or $ trueworkapi TW_TOKEN=<token>');
+    process.exit(1);
+}
+
 program
   .option('-v, --verbose', 'Verbose output')
   .option('--production', 'Production environment')
   .description('CLI for Truework')
   .action(() => {mainPrompt()})
 
-const verifications = program.command('verifications');
-
 // List Verifications
-verifications
+program
   .command('list')
   .addOption(
     new Option('--state').choices([
@@ -33,14 +36,14 @@ verifications
  );
 
 // Get Verification
-verifications
+program
   .command('get')
   .argument('<verification_id>')
-  .action((verification_id) => getVerification(verification_id));
+  .action((verification_id, options, cmd) => getVerification(verification_id, options, cmd));
 
 
 // Create Verifications
-verifications
+program
   .command('create')
   .description('Create Verification')
   .addOption(
@@ -66,9 +69,9 @@ verifications
       'subpoena',
     ])
   )
-  .option('-i, --instant', 'Instant Verification', true)
-  .option('-c, --credentials', 'Credentials Verification')
-  .option('-s, --smart-outreach', 'Smart Outreach Verification')
+  .option('--instant', 'Instant Verification', true)
+  .option(' --credentials', 'Credentials Verification')
+  .option('--smart-outreach', 'Smart Outreach Verification')
   .requiredOption('-f, --first_name <first_name>', 'First Name')
   .requiredOption('-l, --last_name <last_name>', 'Last Name')
   .requiredOption('--ssn <ssn>', 'Social Security Number')
@@ -83,10 +86,6 @@ program
   .argument('<company_name>')
   .option('-l, --limit', 'Limit the number of results', '25')
   .option('--offset')
-  .action((company_name, options) => getCompany(company_name, options));
+  .action((company_name, options, cmd) => getCompany(company_name, options, cmd));
 
 program.parse();
-
-if (program.opts().production == true) {
-  environment = 'https://api.truework.com/';
-}

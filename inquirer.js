@@ -64,7 +64,7 @@ createPrompt = () => {
       {
         type: 'checkbox',
         name: 'methods',
-        message: 'Which verfiication methods?',
+        message: 'Which verfication methods?',
         choices: ['instant', 'credentials', 'smart-outreach'],
       },
       {
@@ -136,11 +136,7 @@ createPrompt = () => {
       createVerification(options)
     })
     .catch((error) => {
-      if (error.isTtyError) {
         console.error(error)
-      } else {
-        console.error(error)
-      }
     })
 }
 
