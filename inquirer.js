@@ -4,6 +4,7 @@ const {
   getVerification,
   createVerification,
 } = require('./twapi')
+
 const mainPrompt = () => {
   inquirer
     .prompt([

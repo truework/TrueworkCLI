@@ -11,7 +11,8 @@
     "dotenv": "^16.0.0",
     "inquirer": "^8.2.1",
     "moment": "^2.29.1",
-    "terminal-kit": "^2.4.0"
+    "terminal-kit": "^2.4.0",
+    "trueworkcli": "github:truework/trueworkcli"
   },
   "bin": {
     "trueworkcli": "./index.js"
