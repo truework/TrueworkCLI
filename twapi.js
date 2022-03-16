@@ -56,14 +56,23 @@ const listVerifications = (options, cmd) => {
           console.log(config)
           console.log(cmd.optsWithGlobals())
           console.dir(data, { depth: null, colors: true })
-        } else  {
-          prettyPrintVerification(data.results)
-          // selectVerification(data)
+        }
+        prettyPrintVerification(data.results)
+        if (params.offset + params.limit <= data.count) {
+          inquirer
+            .prompt([{ type: 'confirm', name: 'nextPage', message: 'Next Page?' }])
+            .then((answers) => {
+              if (answers. nextPage == true) {
+                options.limit = params.limit
+                options.offset = parseInt(params.offset) + parseInt(params.limit)
+                listVerifications(options, cmd)
+              }
+            })
         }
       }
     })
     .catch((err) => {
-      if (err.response.status === 400) {
+      if (err.response && err.response.status === 400) {
         console.log(`Verification ${verification_id} not found`)
         if (cmd.optsWithGlobals().verbose) {
           console.error(err)
@@ -107,7 +116,7 @@ const prettyPrintVerification = (list) => {
       `\tSSN: ${item.target.social_security_number} Company: ${item.target.company.name}\n`
     )
     term(`\tVerification ID: ${item.id}\n`)
-    
+
     switch (item.state) {
       case 'action-required':
         term.blue(`\tState: ${item.state}\n`)
