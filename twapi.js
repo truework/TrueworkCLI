@@ -1,6 +1,7 @@
 const axios = require('axios')
 var term = require('terminal-kit').terminal
 const moment = require('moment')
+var inquirer = require('inquirer')
 
 const getVerification = (verification_id, options, cmd) => {
   axios({
@@ -16,7 +17,6 @@ const getVerification = (verification_id, options, cmd) => {
   })
     .then(({ data }) => {
       if (cmd.optsWithGlobals().verbose) {
-        console.log(cmd.options())
         console.dir(data, { depth: null, colors: true })
       } else {
         prettyPrintVerification(data)
@@ -58,6 +58,7 @@ const listVerifications = (options, cmd) => {
           console.dir(data, { depth: null, colors: true })
         } else {
           prettyPrintVerification(data.results)
+          selectVerification(data)
         }
       }
     })
@@ -66,11 +67,28 @@ const listVerifications = (options, cmd) => {
     })
 }
 
+
+const selectVerification = (list) => {
+  verification_readable_list = list.results.map(item => [item.id, item.target.first_name, item.target.last_name, item.created].join(" "))
+  inquirer.prompt([
+    {
+      type: 'list',
+      name: 'purpose',
+      message: 'Which Validation would you like more information on?',
+      choices: verification_readable_list
+    },
+  ]).then(answer=> {
+    console.dir(list.results.filter(item => item.id == answer.purpose.split(" ")[0]))
+  })
+}
+
+
+
 const prettyPrintVerification = (list) => {
   if (list.id) {
     list = [list]
   }
-  // console.dir(list, { depth: null, colors: true })
+  console.debug(list, { depth: null, colors: true })
   list.forEach((item) => {
     term.bold(`${item.target.first_name} ${item.target.last_name}\n`)
     term(

@@ -41,8 +41,8 @@ if (program.getOptionValue('production')) {
   program.setOptionValue('environment', 'https://api.truework-sandbox.com')
 }
 
-program.action(() => {
-  mainPrompt()
+program.action((options, cmd) => {
+  mainPrompt(options, cmd)
 })
 // List Verifications
 program

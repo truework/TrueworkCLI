@@ -5,7 +5,7 @@ const {
   createVerification,
 } = require('./twapi')
 
-const mainPrompt = () => {
+const mainPrompt = (options, cmd) => {
   inquirer
     .prompt([
       {
@@ -22,23 +22,27 @@ const mainPrompt = () => {
     .then((answers) => {
       switch (answers.option) {
         case 'Create a new verification request':
-          createPrompt()
+          createPrompt(options, cmd)
           break
         case 'Get a list of verification requests':
-          listVerifications({}, {})
+          listVerifications(options, cmd)
           break
         case 'Get a verification request':
-          inquirer
-            .prompt([
-              {
-                type: 'input',
-                name: 'verification_id',
-                message: 'Enter the verification ID',
-              },
-            ])
-            .then((answers) => {
-              getVerification(answers.verification_id, {}, {})
-            })
+          try {
+            inquirer
+              .prompt([
+                {
+                  type: 'input',
+                  name: 'verification_id',
+                  message: 'Enter the verification ID',
+                },
+              ])
+              .then((answers) => {
+                getVerification(answers.verification_id, options, cmd)
+              })
+          } catch {(err) => {
+            console.error(err)
+          }}
       }
     })
     .catch((error) => {
