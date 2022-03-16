@@ -23,7 +23,7 @@ const getVerification = (verification_id, options, cmd) => {
       }
     })
     .catch((err) => {
-      if (err.status === 400) {
+      if (err.response.status === 400) {
         console.log(`Verification ${verification_id} not found`)
         if (cmd.optsWithGlobals().verbose) {
           console.error(err)
@@ -56,51 +56,68 @@ const listVerifications = (options, cmd) => {
           console.log(config)
           console.log(cmd.optsWithGlobals())
           console.dir(data, { depth: null, colors: true })
-        } else {
+        } else  {
           prettyPrintVerification(data.results)
-          selectVerification(data)
+          // selectVerification(data)
         }
       }
     })
     .catch((err) => {
-      console.error(err)
+      if (err.response.status === 400) {
+        console.log(`Verification ${verification_id} not found`)
+        if (cmd.optsWithGlobals().verbose) {
+          console.error(err)
+        }
+      } else {
+        console.error(err)
+      }
     })
 }
 
-
 const selectVerification = (list) => {
-  verification_readable_list = list.results.map(item => [item.id, item.target.first_name, item.target.last_name, item.created].join(" "))
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'purpose',
-      message: 'Which Validation would you like more information on?',
-      choices: verification_readable_list
-    },
-  ]).then(answer=> {
-    console.dir(list.results.filter(item => item.id == answer.purpose.split(" ")[0]))
-  })
+  verification_readable_list = list.results.map((item) =>
+    [item.id, item.target.first_name, item.target.last_name, item.created].join(
+      ' '
+    )
+  )
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'purpose',
+        message: 'Which Validation would you like more information on?',
+        choices: verification_readable_list,
+      },
+    ])
+    .then((answer) => {
+      console.dir(
+        list.results.filter((item) => item.id == answer.purpose.split(' ')[0])
+      )
+    })
 }
-
-
 
 const prettyPrintVerification = (list) => {
   if (list.id) {
     list = [list]
   }
-  console.debug(list, { depth: null, colors: true })
+  // console.debug(list, { depth: null, colors: true })
   list.forEach((item) => {
     term.bold(`${item.target.first_name} ${item.target.last_name}\n`)
     term(
       `\tSSN: ${item.target.social_security_number} Company: ${item.target.company.name}\n`
     )
     term(`\tVerification ID: ${item.id}\n`)
-    if (item.reports) {
-      item.reports.forEach((report) => {
-        prettyPrintReport(report)
-      })
-    }
+    
     switch (item.state) {
+      case 'action-required':
+        term.blue(`\tState: ${item.state}\n`)
+        break
+      case 'invalid':
+        term.brighRed(`\tState: ${item.state}\n`)
+        break
+      case 'pending-approval':
+        term.cyan(`\tStatus: ${item.state}\n`)
+        break
       case 'canceled':
         term.red(`\tStatus: ${item.state}\n`)
         break
@@ -112,6 +129,11 @@ const prettyPrintVerification = (list) => {
         break
       default:
         term(`\tStatus: ${item.state}\n`)
+    }
+    if (item.reports) {
+      item.reports.forEach((report) => {
+        prettyPrintReport(report)
+      })
     }
     term.bold(`\tCreated: `)
     term(`${moment(item.created).format('LLLL')} `)
@@ -199,12 +221,12 @@ const createVerification = (options, cmd) => {
       if (cmd.optsWithGlobals().verbose) {
         console.dir(data, { depth: null, colors: true })
       } else {
-        prettyPrintList(data.results)
+        prettyPrintVerification(data)
       }
     })
     .catch((err) => {
       console.dir(verification, { depth: null, colors: true })
-      console.dir(err.response.data, { depth: null, colors: true })
+      console.dir(err, { depth: null, colors: true })
     })
 }
 

@@ -18,28 +18,31 @@ if (!process.env.TW_TOKEN) {
   process.exit(1)
 }
 
+const evalEnv = (cmd) => {
+  if (cmd.optsWithGlobals().production) {
+    if (!process.env.TW_TOKEN_PROD) {
+      console.error(
+        'TW_TOKEN_PROD environment variable is not set\nPlease define one in .env or $ trueworkapi TW_TOKEN_PROD=<token>'
+      )
+      process.exit(1)
+    }
+    process.env.TW_TOKEN = process.env.TW_TOKEN_PROD
+    console.log(`Using production environment`)
+    program.setOptionValue('environment', 'https://api.truework.com')
+  } else {
+    program.setOptionValue('environment', 'https://api.truework-sandbox.com')
+  }
+}
 program
   .option('-v, --verbose', 'Verbose output')
-  .option('-p, --production', 'Use production environment')
+  .addOption(
+    new Option('-p, --production', 'Use production environment').env(
+      'TWCLI_PROD'
+    )
+  )
   .description(
     'CLI for Truework\nDefine API key in .env or TW_TOKEN=<token>\nDefault env is Staging. Use --production to use production'
   )
-
-program.parse()
-
-if (program.getOptionValue('production')) {
-  if (!process.env.TW_TOKEN_PROD) {
-    console.error(
-      'TW_TOKEN_PROD environment variable is not set\nPlease define one in .env or $ trueworkapi TW_TOKEN_PROD=<token>'
-    )
-    process.exit(1)
-  }
-  process.env.TW_TOKEN = process.env.TW_TOKEN_PROD
-  console.log(`Using production environment`)
-  program.setOptionValue('environment', 'https://api.truework.com')
-} else {
-  program.setOptionValue('environment', 'https://api.truework-sandbox.com')
-}
 
 program.action((options, cmd) => {
   mainPrompt(options, cmd)
@@ -60,6 +63,7 @@ program
   .option('-l, --limit <limit>', 'Limit the number of results', '25')
   .option('-o, --offset <offset>', 'Offset the results', '0')
   .action((options, cmd) => {
+    evalEnv(cmd)
     listVerifications(options, cmd)
   })
 
@@ -67,9 +71,10 @@ program
 program
   .command('get')
   .argument('<verification_id>')
-  .action((verification_id, options, cmd) =>
+  .action((verification_id, options, cmd) => {
+    evalEnv(cmd)
     getVerification(verification_id, options, cmd)
-  )
+  })
 
 // Create Verifications
 program
@@ -84,19 +89,21 @@ program
     new Option(
       '--purpose <purpose>',
       'A valid purpose is required for Truework to process the verification request.'
-    ).choices([
-      'child-support',
-      'credit-application',
-      'employee-eligibility',
-      'employee-request',
-      'employee-review-or-collection',
-      'employment',
-      'insurance-underwriting-application',
-      'legitimate-reason-initiated',
-      'legitimate-reason-review',
-      'risk-assessment',
-      'subpoena',
-    ])
+    )
+      .choices([
+        'child-support',
+        'credit-application',
+        'employee-eligibility',
+        'employee-request',
+        'employee-review-or-collection',
+        'employment',
+        'insurance-underwriting-application',
+        'legitimate-reason-initiated',
+        'legitimate-reason-review',
+        'risk-assessment',
+        'subpoena',
+      ])
+      .default('credit-application')
   )
   .option('--instant', 'Instant Verification', true)
   .option(' --credentials', 'Credentials Verification')
@@ -107,7 +114,10 @@ program
   .requiredOption('-c, --company <company>', 'Company Name')
   .option('--email [email]', 'Email')
   .option('--phone [phone]', 'Phone')
-  .action((options, cmd) => createVerification(options, cmd))
+  .action((options, cmd) => {
+    evalEnv(cmd)
+    createVerification(options, cmd)
+  })
 
 program
   .command('companies')
@@ -115,8 +125,9 @@ program
   .argument('<company_name>')
   .option('-l, --limit', 'Limit the number of results', '25')
   .option('--offset')
-  .action((company_name, options, cmd) =>
+  .action((company_name, options, cmd) => {
+    evalEnv(cmd)
     getCompany(company_name, options, cmd)
-  )
+  })
 
 program.parse()
