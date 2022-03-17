@@ -1,0 +1,43 @@
+{
+  "type": "employment-income",
+  "permissible_purpose": "child-support",
+  "target": {
+    "social_security_number": "000-00-0000",
+    "company": {
+      "id": 0,
+      "phone_number": "string",
+      "address": "string",
+      "city": "string",
+      "state": "string",
+      "zip_code": "string"
+    },
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "contact_email": "user@example.com",
+    "date_of_birth": "2019-08-24"
+  },
+  "metadata": {},
+  "additional_information": "string",
+  "loan_id": "string",
+  "use_case": "mortgage",
+  "request_parameters": {
+    "verification_methods": {
+      "instant": {
+        "enabled": true
+      },
+      "credentials": {
+        "enabled": true
+      },
+      "smart_outreach": {
+        "enabled": true
+      }
+    },
+    "employer_filter": "target-employer",
+    "automated_underwriting_system_eligibility": "not-required"
+  },
+  "reseller_originating_party": {
+    "originating_party": "string",
+    "use_case": "mortgage",
+    "permissable_purpose": "child-support"
+  }
+}

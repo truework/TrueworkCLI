@@ -8,6 +8,7 @@ const {
   getCompany,
   getVerification,
   listVerifications,
+  importFile,
 } = require('./twapi')
 const program = new Command()
 
@@ -61,7 +62,7 @@ program
       'canceled',
     ])
   )
-  .option('-l, --limit <limit>', 'Limit the number of results', '25')
+  .option('-l, --limit <limit>', 'Limit the number of results', '10')
   .option('-o, --offset <offset>', 'Offset the results', '0')
   .action((options, cmd) => {
     evalEnv(cmd)
@@ -118,6 +119,15 @@ program
   .action((options, cmd) => {
     evalEnv(cmd)
     createVerification(options, cmd)
+  })
+
+program
+  .command('import')
+  .description('Import Verification')
+  .arguments('<file>')
+  .action((filePath, options, cmd) => {
+    evalEnv(cmd)
+    importFile(filePath, cmd)
   })
 
 program
