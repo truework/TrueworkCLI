@@ -6,6 +6,8 @@ const {
   getVerification,
   createVerification,
   getCompany,
+  cancelVerification,
+  selectVerification,
 } = require('./twapi')
 
 const mainPrompt = (options, cmd) => {
@@ -32,6 +34,7 @@ const mainPrompt = (options, cmd) => {
           'Get a list of verification requests',
           'Get a verification request',
           'Lookup a company ID',
+          'Cancel a Verification Request',
         ],
       },
     ])
@@ -74,6 +77,33 @@ const mainPrompt = (options, cmd) => {
               console.error(error)
             })
           break
+        case 'Cancel a Verification Request':
+          //TODO: List only verifications that are cancellable
+          selectVerification(options, cmd).then((verification_id) => {
+            inquirer
+              .prompt([
+                {
+                  type: 'list',
+                  name: 'reason',
+                  message: 'Verification Cancellation Reason?',
+                  choices: [
+                    'immediate',
+                    'high-turnaround-time',
+                    'competitor',
+                    'wrong-info',
+                    'other',
+                  ],
+                },
+                {
+                  type: 'input',
+                  name: 'detail',
+                  message: 'Cancellation memo',
+                },
+              ])
+              .then((answers) => {
+                cancelVerification(verification_id, answers, cmd)
+              })
+          })
       }
     })
     .catch((error) => {
@@ -82,7 +112,7 @@ const mainPrompt = (options, cmd) => {
 }
 
 // Create Verification Prompt
-const createPrompt = () => {
+const createPrompt = (options, cmd) => {
   inquirer
     .prompt([
       {
@@ -138,11 +168,11 @@ const createPrompt = () => {
       {
         type: 'input',
         name: 'dob',
-        message: `'Target's DOB (YYYY-MM-DD)'`,
+        message: `'Target's DOB (YYYY-MM-DD) (Optional)'`,
       },
     ])
     .then((answers) => {
-      console.log(answers)
+      // console.log(answers)
       let options = {
         type: answers.type,
         purpose: answers.purpose,
@@ -163,7 +193,7 @@ const createPrompt = () => {
       if (answers.dob) {
         options.dob = answers.dob
       }
-      createVerification(options, {})
+      createVerification(options, cmd)
     })
     .catch((error) => {
       console.error(error)

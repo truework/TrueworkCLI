@@ -11,7 +11,7 @@ const getVerification = (verification_id, options, cmd) => {
       cmd.optsWithGlobals().environment
     }/verification-requests/${verification_id}`,
     headers: {
-      Accept: 'application/json',
+      Accept: 'application/json; version=2020-12-07',
       'Content-Type': 'application/json;charset=UTF-8',
       Authorization: `Bearer ${process.env.TW_TOKEN}`,
     },
@@ -46,7 +46,7 @@ const listVerifications = (options, cmd) => {
     url: `${cmd.optsWithGlobals().environment}/verification-requests/`,
     params: params,
     headers: {
-      Accept: 'application/json',
+      Accept: 'application/json; version=2020-12-07',
       'Content-Type': 'application/json;charset=UTF-8',
       Authorization: `Bearer ${process.env.TW_TOKEN}`,
     },
@@ -88,27 +88,58 @@ const listVerifications = (options, cmd) => {
     })
 }
 
-// const selectVerification = (list) => {
-//   const verification_readable_list = list.results.map((item) =>
-//     [item.id, item.target.first_name, item.target.last_name, item.created].join(
-//       ' '
-//     )
-//   )
-//   inquirer
-//     .prompt([
-//       {
-//         type: 'list',
-//         name: 'purpose',
-//         message: 'Which Validation would you like more information on?',
-//         choices: verification_readable_list,
-//       },
-//     ])
-//     .then((answer) => {
-//       console.dir(
-//         list.results.filter((item) => item.id == answer.purpose.split(' ')[0])
-//       )
-//     })
-// }
+const selectVerification = async (options, cmd) => {
+  const params = {
+    limit: parseInt(options.limit || 10),
+    offset: parseInt(options.offset || 0),
+    state: options.state || '',
+  }
+  try {
+    const { data } = await axios({
+      method: 'get',
+      url: `${cmd.optsWithGlobals().environment}/verification-requests/`,
+      params: params,
+      headers: {
+        Accept: 'application/json; version=2020-12-07',
+        'Content-Type': 'application/json;charset=UTF-8',
+        Authorization: `Bearer ${process.env.TW_TOKEN}`,
+      },
+    })
+    const verification_readable_list = data.results.map((item) =>
+      [
+        item.id,
+        item.target.first_name,
+        item.target.last_name,
+        item.created,
+      ].join(' ')
+    )
+    verification_readable_list.push('Next Page')
+    const answer = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'purpose',
+        message: 'Select verification request:',
+        choices: verification_readable_list,
+      },
+    ])
+    if (answer.purpose === 'Next Page') {
+      options.limit = params.limit
+      options.offset = params.offset + params.limit
+      return selectVerification(options, cmd)
+    }
+    return data.results.filter(
+      (item) => item.id == answer.purpose.split(' ')[0]
+    )[0].id
+  } catch (err) {
+    if (err.response && err.response.status === 400) {
+      if (cmd.optsWithGlobals().verbose) {
+        console.error(err)
+      }
+    } else {
+      console.error(err)
+    }
+  }
+}
 
 const createVerification = (options, cmd) => {
   let verification = {
@@ -153,7 +184,7 @@ const createVerification = (options, cmd) => {
     url: `${cmd.optsWithGlobals().environment}/verification-requests`,
     data: verification,
     headers: {
-      Accept: 'application/json',
+      Accept: 'application/json; version=2020-12-07',
       'Content-Type': 'application/json;charset=UTF-8',
       Authorization: `Bearer ${process.env.TW_TOKEN}`,
     },
@@ -166,8 +197,14 @@ const createVerification = (options, cmd) => {
       }
     })
     .catch((err) => {
-      console.dir(verification, { depth: null, colors: true })
-      console.dir(err, { depth: null, colors: true })
+      if (err.response.status === 400) {
+        console.dir(err.response.data, { depth: null, colors: true })
+        if (cmd.optsWithGlobals().verbose) {
+          console.dir(err, { depth: null, colors: true })
+        }
+      } else {
+        console.dir(err, { depth: null, colors: true })
+      }
     })
 }
 
@@ -178,7 +215,7 @@ const importFile = (filePath, cmd) => {
     url: `${cmd.optsWithGlobals().environment}/verification-requests`,
     data: data,
     headers: {
-      Accept: 'application/json',
+      Accept: 'application/json; version=2020-12-07',
       'Content-Type': 'application/json;charset=UTF-8',
       Authorization: `Bearer ${process.env.TW_TOKEN}`,
     },
@@ -213,7 +250,7 @@ const getCompany = (company_name, options, cmd) => {
     url: `${cmd.optsWithGlobals().environment}/companies`,
     params: params,
     headers: {
-      Accept: 'application/json',
+      Accept: 'application/json; version=2020-12-07',
       'Content-Type': 'application/json;charset=UTF-8',
       Authorization: `Bearer ${process.env.TW_TOKEN}`,
     },
@@ -255,12 +292,78 @@ const getCompany = (company_name, options, cmd) => {
     })
 }
 
+const cancelVerification = (verification_id, options, cmd) => {
+  axios({
+    method: 'put',
+    url: `${
+      cmd.optsWithGlobals().environment
+    }/verification-requests/${verification_id}/cancel`,
+    data: {
+      cancellation_reason: options.reason,
+      cancellation_details: options.details,
+    },
+    headers: {
+      Accept: 'application/json; version=2020-12-07',
+      'Content-Type': 'application/json;charset=UTF-8',
+      Authorization: `Bearer ${process.env.TW_TOKEN}`,
+    },
+  })
+    .then(({ data }) => {
+      if (cmd.optsWithGlobals().verbose) {
+        console.dir(data, { depth: null, colors: true })
+      } else {
+        prettyPrintVerification(data)
+      }
+    })
+    .catch((err) => {
+      if (err.response) {
+        console.dir(err.response.data, { depth: null, colors: true })
+      } else {
+        console.dir(err, { depth: null, colors: true })
+      }
+    })
+}
+
+const reverifyVerification = (verification_id, report_id, options, cmd) => {
+  axios({
+    method: 'put',
+    url: `${
+      cmd.optsWithGlobals().environment
+    }/verification-requests/${verification_id}/reverify`,
+    data: {
+      report_id: report_id,
+    },
+    headers: {
+      Accept: 'application/json; version=2020-12-07',
+      'Content-Type': 'application/json;charset=UTF-8',
+      Authorization: `Bearer ${process.env.TW_TOKEN}`,
+    },
+  })
+    .then(({ data }) => {
+      if (cmd.optsWithGlobals().verbose) {
+        console.dir(data, { depth: null, colors: true })
+      } else {
+        prettyPrintVerification(data)
+      }
+    })
+    .catch((err) => {
+      if (err.response) {
+        console.dir(err.response.data, { depth: null, colors: true })
+      } else {
+        console.dir(err, { depth: null, colors: true })
+      }
+    })
+}
+
 module.exports = {
   listVerifications,
   getCompany,
   createVerification,
   getVerification,
   importFile,
+  cancelVerification,
+  reverifyVerification,
+  selectVerification,
 }
 
 // Formatting

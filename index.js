@@ -9,6 +9,8 @@ const {
   getVerification,
   listVerifications,
   importFile,
+  cancelVerification,
+  reverifyVerification,
 } = require('./twapi')
 const program = new Command()
 
@@ -53,7 +55,7 @@ program.action((options, cmd) => {
 program
   .command('list')
   .addOption(
-    new Option('--state <state>').choices([
+    new Option('-s, --state <state>').choices([
       'pending-approval',
       'action-required',
       'invalid',
@@ -139,6 +141,41 @@ program
   .action((company_name, options, cmd) => {
     evalEnv(cmd)
     getCompany(company_name, options, cmd)
+  })
+
+program
+  .command('cancel')
+  .description('Cancel Verification')
+  .argument('<verification_id>')
+  .option(
+    '-m, --details [cancellation_details]',
+    'Cancellation Details (-m for memo)'
+  )
+  .addOption(
+    new Option(
+      '-r, --reason <cancellation_reason>',
+      'Cancellation Reason'
+    ).choices([
+      'immediate',
+      'high-turnaround-time',
+      'competitor',
+      'wrong-info',
+      'other',
+    ])
+  )
+  .action((verification_id, options, cmd) => {
+    evalEnv(cmd)
+    cancelVerification(verification_id, options, cmd)
+  })
+
+program
+  .command('reverify')
+  .description('Reverify a Verification')
+  .argument('<verification_id>')
+  .argument('<report_id>')
+  .action((verification_id, report_id, options, cmd) => {
+    evalEnv(cmd)
+    reverifyVerification(verification_id, report_id, options, cmd)
   })
 
 program.parse()
