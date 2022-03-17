@@ -13,6 +13,8 @@ const {
   reverifyVerification,
 } = require('./twapi')
 const program = new Command()
+const cliConfetti = require('cli-confetti'),
+  CliUpdate = require('cli-update')
 
 if (!process.env.TW_TOKEN) {
   console.error(
@@ -51,6 +53,36 @@ program.action((options, cmd) => {
   evalEnv(cmd)
   mainPrompt(options, cmd)
 })
+
+program.command('fun', { hidden: true }).action(() => {
+  cliConfetti(
+    {
+      chars: [
+        '.',
+        '*',
+        '@',
+        '#',
+        '$',
+        '%',
+        '<3',
+        '&',
+        '*',
+        ':D',
+        ':)',
+        ':-)',
+        ';)',
+        ':>',
+        'HackWeek!',
+        'Truework!',
+      ],
+    },
+    function (err, c) {
+      if (err) throw err
+      CliUpdate.render(c)
+    }
+  )
+})
+
 // List Verifications
 program
   .command('list')
@@ -76,6 +108,10 @@ program
   .command('get')
   .argument('<verification_id>')
   .action((verification_id, options, cmd) => {
+    if (verification_id.length !== 56) {
+      console.error('Please enter a valid verification ID')
+      process.exit(1)
+    }
     evalEnv(cmd)
     getVerification(verification_id, options, cmd)
   })

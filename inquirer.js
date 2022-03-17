@@ -68,6 +68,12 @@ const mainPrompt = (options, cmd) => {
                 type: 'input',
                 name: 'verification_id',
                 message: 'Enter the verification ID',
+                validate: (verification_id) => {
+                  if (verification_id.length == 56) {
+                    return true
+                  }
+                  return 'Please enter a valid verification ID'
+                },
               },
             ])
             .then((answers) => {
