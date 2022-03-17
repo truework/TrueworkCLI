@@ -17,12 +17,19 @@
   "bin": {
     "trueworkcli": "./index.js"
   },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
+  },
   "scripts": {
     "format": "prettier-eslint \"src/**/*.js\""
   },
   "devDependencies": {
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.5.1"
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.6.0"
   }
 }

@@ -35,9 +35,9 @@ const getVerification = (verification_id, options, cmd) => {
 }
 
 const listVerifications = (options, cmd) => {
-  params = {
-    limit: options.limit || 10,
-    offset: options.offset || 0,
+  const params = {
+    limit: parseInt(options.limit || 10),
+    offset: parseInt(options.offset || 0),
     state: options.state || '',
   }
   axios({
@@ -58,13 +58,17 @@ const listVerifications = (options, cmd) => {
           console.dir(data, { depth: null, colors: true })
         }
         prettyPrintVerification(data.results)
-        if (params.offset + params.limit <= data.count) {
+        // Pagination
+        if (params.offset + params.limit < data.count) {
+          term.red(`Items: ${params.offset}-${params.offset + params.limit}\n`)
           inquirer
-            .prompt([{ type: 'confirm', name: 'nextPage', message: 'Next Page?' }])
+            .prompt([
+              { type: 'confirm', name: 'nextPage', message: 'Next Page?' },
+            ])
             .then((answers) => {
-              if (answers. nextPage == true) {
+              if (answers.nextPage == true) {
                 options.limit = params.limit
-                options.offset = parseInt(params.offset) + parseInt(params.limit)
+                options.offset = params.offset + params.limit
                 listVerifications(options, cmd)
               }
             })
@@ -73,7 +77,6 @@ const listVerifications = (options, cmd) => {
     })
     .catch((err) => {
       if (err.response && err.response.status === 400) {
-        console.log(`Verification ${verification_id} not found`)
         if (cmd.optsWithGlobals().verbose) {
           console.error(err)
         }
@@ -83,27 +86,27 @@ const listVerifications = (options, cmd) => {
     })
 }
 
-const selectVerification = (list) => {
-  verification_readable_list = list.results.map((item) =>
-    [item.id, item.target.first_name, item.target.last_name, item.created].join(
-      ' '
-    )
-  )
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'purpose',
-        message: 'Which Validation would you like more information on?',
-        choices: verification_readable_list,
-      },
-    ])
-    .then((answer) => {
-      console.dir(
-        list.results.filter((item) => item.id == answer.purpose.split(' ')[0])
-      )
-    })
-}
+// const selectVerification = (list) => {
+//   const verification_readable_list = list.results.map((item) =>
+//     [item.id, item.target.first_name, item.target.last_name, item.created].join(
+//       ' '
+//     )
+//   )
+//   inquirer
+//     .prompt([
+//       {
+//         type: 'list',
+//         name: 'purpose',
+//         message: 'Which Validation would you like more information on?',
+//         choices: verification_readable_list,
+//       },
+//     ])
+//     .then((answer) => {
+//       console.dir(
+//         list.results.filter((item) => item.id == answer.purpose.split(' ')[0])
+//       )
+//     })
+// }
 
 const prettyPrintVerification = (list) => {
   if (list.id) {
@@ -144,12 +147,12 @@ const prettyPrintVerification = (list) => {
         prettyPrintReport(report)
       })
     }
-    term.bold(`\tCreated: `)
+    term.bold('\tCreated: ')
     term(`${moment(item.created).format('LLLL')} `)
     if (item.date_of_completion) {
-      term.bold(`Completed: `)
+      term.bold('Completed: ')
       term(`${moment(item.date_of_completion).format('LLLL')}, `)
-      term.bold(`Time Elapsed: `)
+      term.bold('Time Elapsed: ')
       term(
         `${moment(item.date_of_completion).diff(
           moment(item.created),
@@ -157,7 +160,7 @@ const prettyPrintVerification = (list) => {
         )}m\n`
       )
     } else {
-      term(`\n`)
+      term('\n')
     }
   })
 }
@@ -172,7 +175,7 @@ const prettyPrintReport = (report) => {
       if (position.end_date) {
         term(` - ${position.end_date}\n`)
       } else {
-        term(`\n`)
+        term('\n')
       }
     })
   }
@@ -240,16 +243,15 @@ const createVerification = (options, cmd) => {
 }
 
 const getCompany = (company_name, options, cmd) => {
-  isProduction(options, cmd)
-
+  let params = {
+    q: company_name,
+    limit: parseInt(options.limit || 10),
+    offset: parseInt(options.offset || 0),
+  }
   axios({
     method: 'get',
     url: `${cmd.optsWithGlobals().environment}/companies`,
-    params: {
-      q: company_name,
-      limit: options.limit,
-      offset: options.offset,
-    },
+    params: params,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json;charset=UTF-8',
@@ -257,7 +259,36 @@ const getCompany = (company_name, options, cmd) => {
     },
   })
     .then(({ data }) => {
-      console.log(data)
+      if (data.count == 0) {
+        console.log(`Company ${company_name} not found`)
+        process.exit(1)
+      }
+      const headers = Object.keys(data.results[0])
+      const values = data.results.map((company) => Object.values(company))
+      term.table([headers].concat(values), {
+        firstRowTextAttr: { bgColor: 'gray' },
+      })
+      // data.results.forEach((company) => {
+      //   term(`${company.id}\t`)
+      //   term.bold(`${company.name}`)
+      //   term(" - ")
+      //   term(`${company.domain}`)
+      //   term("\n")
+      // })
+      if (params.offset + params.limit < data.count) {
+        term.red(`Items: ${params.offset}-${params.offset + params.limit}\n`)
+        inquirer
+          .prompt([
+            { type: 'confirm', name: 'nextPage', message: 'Next Page?' },
+          ])
+          .then((answers) => {
+            if (answers.nextPage == true) {
+              options.limit = params.limit
+              options.offset = params.offset + params.limit
+              getCompany(company_name, options, cmd)
+            }
+          })
+      }
     })
     .catch((err) => {
       console.error(err)

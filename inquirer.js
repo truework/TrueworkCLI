@@ -1,11 +1,26 @@
-var inquirer = require('inquirer')
+const inquirer = require('inquirer')
+const term = require('terminal-kit').terminal
+
 const {
   listVerifications,
   getVerification,
   createVerification,
+  getCompany,
 } = require('./twapi')
 
 const mainPrompt = (options, cmd) => {
+  const ascii = `
+ $$$$$$$$\\                                                              $$\\        $$$$$$\\  $$\\       $$$$$$\\ 
+ \\__$$  __|                                                             $$ |      $$  __$$\\ $$ |      \\_$$  _|
+    $$ | $$$$$$\\  $$\\   $$\\  $$$$$$\\  $$\\  $$\\  $$\\  $$$$$$\\   $$$$$$\\  $$ |  $$\\ $$ /  \\__|$$ |        $$ |  
+    $$ |$$  __$$\\ $$ |  $$ |$$  __$$\\ $$ | $$ | $$ |$$  __$$\\ $$  __$$\\ $$ | $$  |$$ |      $$ |        $$ |  
+    $$ |$$ |  \\__|$$ |  $$ |$$$$$$$$ |$$ | $$ | $$ |$$ /  $$ |$$ |  \\__|$$$$$$  / $$ |      $$ |        $$ |  
+    $$ |$$ |      $$ |  $$ |$$   ____|$$ | $$ | $$ |$$ |  $$ |$$ |      $$  _$$<  $$ |  $$\\ $$ |        $$ |  
+    $$ |$$ |      \\$$$$$$  |\\$$$$$$$\\ \\$$$$$\\$$$$  |\\$$$$$$  |$$ |      $$ | \\$$\\ \\$$$$$$  |$$$$$$$$\\ $$$$$$\\ 
+    \\__|\\__|       \\______/  \\_______| \\_____\\____/  \\______/ \\__|      \\__|  \\__| \\______/ \\________|\\______|
+
+`
+  term(ascii)
   inquirer
     .prompt([
       {
@@ -16,6 +31,7 @@ const mainPrompt = (options, cmd) => {
           'Create a new verification request',
           'Get a list of verification requests',
           'Get a verification request',
+          'Lookup a company ID',
         ],
       },
     ])
@@ -27,22 +43,37 @@ const mainPrompt = (options, cmd) => {
         case 'Get a list of verification requests':
           listVerifications(options, cmd)
           break
+        case 'Lookup a company ID':
+          inquirer
+            .prompt({
+              type: 'input',
+              name: 'company_name',
+              message: 'What company would you like to search for?',
+            })
+            .then((answers) => {
+              getCompany(answers.company_name, options, cmd)
+              mainPrompt(options, cmd)
+            })
+            .catch((error) => {
+              console.error(error)
+            })
+          break
         case 'Get a verification request':
-          try {
-            inquirer
-              .prompt([
-                {
-                  type: 'input',
-                  name: 'verification_id',
-                  message: 'Enter the verification ID',
-                },
-              ])
-              .then((answers) => {
-                getVerification(answers.verification_id, options, cmd)
-              })
-          } catch {(err) => {
-            console.error(err)
-          }}
+          inquirer
+            .prompt([
+              {
+                type: 'input',
+                name: 'verification_id',
+                message: 'Enter the verification ID',
+              },
+            ])
+            .then((answers) => {
+              getVerification(answers.verification_id, options, cmd)
+            })
+            .catch((error) => {
+              console.error(error)
+            })
+          break
       }
     })
     .catch((error) => {
@@ -51,7 +82,7 @@ const mainPrompt = (options, cmd) => {
 }
 
 // Create Verification Prompt
-createPrompt = () => {
+const createPrompt = () => {
   inquirer
     .prompt([
       {
@@ -87,32 +118,32 @@ createPrompt = () => {
       {
         type: 'input',
         name: 'company',
-        message: "Target's Company",
+        message: `'Target's Company'`,
       },
       {
         type: 'input',
         name: 'first_name',
-        message: "Target's first name",
+        message: `'Target's first name'`,
       },
       {
         type: 'input',
         name: 'last_name',
-        message: "Target's last name",
+        message: `'Target's last name'`,
       },
       {
         type: 'input',
         name: 'ssn',
-        message: "Target's SSN",
+        message: `'Target's SSN'`,
       },
       {
         type: 'input',
         name: 'dob',
-        message: "Target's DOB (YYYY-MM-DD)",
+        message: `'Target's DOB (YYYY-MM-DD)'`,
       },
     ])
     .then((answers) => {
       console.log(answers)
-      options = {
+      let options = {
         type: answers.type,
         purpose: answers.purpose,
         company: answers.company,

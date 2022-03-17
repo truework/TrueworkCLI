@@ -27,7 +27,7 @@ const evalEnv = (cmd) => {
       process.exit(1)
     }
     process.env.TW_TOKEN = process.env.TW_TOKEN_PROD
-    console.log(`Using production environment`)
+    console.log('Using production environment')
     program.setOptionValue('environment', 'https://api.truework.com')
   } else {
     program.setOptionValue('environment', 'https://api.truework-sandbox.com')
@@ -45,6 +45,7 @@ program
   )
 
 program.action((options, cmd) => {
+  evalEnv(cmd)
   mainPrompt(options, cmd)
 })
 // List Verifications
@@ -120,7 +121,7 @@ program
   })
 
 program
-  .command('companies')
+  .command('company')
   .description('Company queries')
   .argument('<company_name>')
   .option('-l, --limit', 'Limit the number of results', '25')
