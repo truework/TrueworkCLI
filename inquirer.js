@@ -125,7 +125,11 @@ const createPrompt = (options, cmd) => {
         type: 'checkbox',
         name: 'methods',
         message: 'Which verfication methods?',
-        choices: ['instant', 'credentials', 'smart-outreach'],
+        choices: [
+          { name: 'instant', checked: true },
+          'credentials',
+          'smart-outreach',
+        ],
       },
       {
         type: 'list',
@@ -149,21 +153,48 @@ const createPrompt = (options, cmd) => {
         type: 'input',
         name: 'company',
         message: `'Target's Company'`,
+        validate: (input) => {
+          if (input.length) {
+            return true
+          } else {
+            return 'Please enter a company name'
+          }
+        },
       },
       {
         type: 'input',
         name: 'first_name',
         message: `'Target's first name'`,
+        validate: (input) => {
+          if (input.length) {
+            return true
+          } else {
+            return 'Please enter a first name'
+          }
+        },
       },
       {
         type: 'input',
         name: 'last_name',
         message: `'Target's last name'`,
+        validate: (input) => {
+          if (input.length) {
+            return true
+          } else {
+            return 'Please enter a last name'
+          }
+        },
       },
       {
         type: 'input',
         name: 'ssn',
         message: `'Target's SSN'`,
+        validate: (input) => {
+          if (/^\d{3}-?\d{2}-?\d{4}$/.test(input)) {
+            return true
+          }
+          return 'Please enter a valid SSN'
+        },
       },
       {
         type: 'input',
