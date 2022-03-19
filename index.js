@@ -13,8 +13,6 @@ const {
   reverifyVerification,
 } = require('./twapi')
 const program = new Command()
-const cliConfetti = require('cli-confetti'),
-  CliUpdate = require('cli-update')
 
 if (!process.env.TW_TOKEN) {
   console.error(
@@ -54,34 +52,6 @@ program.action((options, cmd) => {
   mainPrompt(options, cmd)
 })
 
-program.command('fun', { hidden: true }).action(() => {
-  cliConfetti(
-    {
-      chars: [
-        '.',
-        '*',
-        '@',
-        '#',
-        '$',
-        '%',
-        '<3',
-        '&',
-        '*',
-        ':D',
-        ':)',
-        ':-)',
-        ';)',
-        ':>',
-        'HackWeek!',
-        'Truework!',
-      ],
-    },
-    function (err, c) {
-      if (err) throw err
-      CliUpdate.render(c)
-    }
-  )
-})
 
 // List Verifications
 program
