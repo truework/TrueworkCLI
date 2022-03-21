@@ -34,6 +34,7 @@ const evalEnv = (cmd) => {
     program.setOptionValue('environment', 'https://api.truework.com')
   } else {
     program.setOptionValue('environment', 'https://api.truework-sandbox.com')
+    // program.setOptionValue('environment', 'http://localhost:8000/external-api')
   }
 }
 program
@@ -51,7 +52,6 @@ program.action((options, cmd) => {
   evalEnv(cmd)
   mainPrompt(options, cmd)
 })
-
 
 // List Verifications
 program
@@ -133,9 +133,10 @@ program
   .command('import')
   .description('Import Verification')
   .arguments('<file>')
+  .option('-s, --sync', 'Sync Verification (Instant Response)')
   .action((filePath, options, cmd) => {
     evalEnv(cmd)
-    importFile(filePath, cmd)
+    importFile(filePath, options, cmd)
   })
 
 program

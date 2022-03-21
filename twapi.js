@@ -83,7 +83,7 @@ const listVerifications = (options, cmd) => {
           console.error(err)
         }
       } else {
-        console.error(err)
+        console.error(err.response.status)
       }
     })
 }
@@ -198,9 +198,11 @@ const createVerification = (options, cmd) => {
     })
     .catch((err) => {
       if (err.response.status === 400) {
+        console.dir(err.response.status, { depth: null, colors: true })
+        console.dir(err.response.headers, { depth: null, colors: true })
         console.dir(err.response.data, { depth: null, colors: true })
         if (cmd.optsWithGlobals().verbose) {
-          console.dir(err, { depth: null, colors: true })
+          console.dir(err.response.config, { depth: null, colors: true })
         }
       } else {
         console.dir(err, { depth: null, colors: true })
@@ -208,30 +210,38 @@ const createVerification = (options, cmd) => {
     })
 }
 
-const importFile = (filePath, cmd) => {
+const importFile = (filePath, options, cmd) => {
   const data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
+  const headers = {
+    Accept: 'application/json; version=2020-12-07',
+    'Content-Type': 'application/json;charset=UTF-8',
+    Authorization: `Bearer ${process.env.TW_TOKEN}`,
+  }
+  if (options.sync) {
+    headers['Request-Sync'] = 'sync'
+  }
   axios({
     method: 'post',
     url: `${cmd.optsWithGlobals().environment}/verification-requests`,
     data: data,
-    headers: {
-      Accept: 'application/json; version=2020-12-07',
-      'Content-Type': 'application/json;charset=UTF-8',
-      Authorization: `Bearer ${process.env.TW_TOKEN}`,
-    },
+    headers: headers,
   })
-    .then(({ data }) => {
+    .then((resp) => {
       if (cmd.optsWithGlobals().verbose) {
-        console.dir(data, { depth: null, colors: true })
+        console.dir(resp.config, { depth: null, colors: true })
+        console.log(JSON.stringify(resp.data, null, 2))
+        // console.dir(resp.data, { depth: null, colors: true })
       } else {
-        prettyPrintVerification(data)
+        prettyPrintVerification(resp.data)
       }
     })
     .catch((err) => {
       if (err.response.status === 400) {
+        console.dir(err.response.status, { depth: null, colors: true })
+        console.dir(err.response.headers, { depth: null, colors: true })
         console.dir(err.response.data, { depth: null, colors: true })
         if (cmd.optsWithGlobals().verbose) {
-          console.dir(err, { depth: null, colors: true })
+          console.dir(err.response.config, { depth: null, colors: true })
         }
       } else {
         console.dir(err, { depth: null, colors: true })
@@ -288,7 +298,16 @@ const getCompany = (company_name, options, cmd) => {
       }
     })
     .catch((err) => {
-      console.error(err)
+      if (err.response.status === 400) {
+        console.dir(err.response.status, { depth: null, colors: true })
+        console.dir(err.response.headers, { depth: null, colors: true })
+        console.dir(err.response.data, { depth: null, colors: true })
+        if (cmd.optsWithGlobals().verbose) {
+          console.dir(err.response.config, { depth: null, colors: true })
+        }
+      } else {
+        console.dir(err, { depth: null, colors: true })
+      }
     })
 }
 

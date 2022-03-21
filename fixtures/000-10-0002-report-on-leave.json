@@ -1,0 +1,12 @@
+{
+  "type": "employment-income",
+  "permissible_purpose": "child-support",
+  "target": {
+    "social_security_number": "000-10-0002",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "contact_email": "user@example.com",
+    "date_of_birth": "2019-08-24"
+  },
+  "use_case": "mortgage"
+}

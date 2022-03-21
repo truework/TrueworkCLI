@@ -1,0 +1,15 @@
+{
+  "type": "employment-income",
+  "permissible_purpose": "child-support",
+  "target": {
+    "social_security_number": "000-01-0000",
+    "company": {
+      "id": 1
+    },
+    "first_name": "Cancelled",
+    "last_name": "Doe",
+    "contact_email": "user@example.com",
+    "date_of_birth": "2019-08-24"
+  },
+  "use_case": "mortgage"
+}

@@ -1,0 +1,25 @@
+{
+  "type": "employment",
+  "permissible_purpose": "risk-assessment",
+  "target": {
+    "first_name": "Joe",
+    "last_name": "Smith",
+    "social_security_number": "000-00-0000",
+    "contact_email": "joesmith@example.org",
+    "company": {
+      "name": "Example Inc."
+    }
+  },
+  "documents": [],
+  "request_parameters": {
+    "employer_filter": "target-employer",
+    "verification_methods": {
+      "instant": {
+        "enabled": true
+      },
+      "smart_outreach": {
+        "enabled": true
+      }
+    }
+  }
+}
