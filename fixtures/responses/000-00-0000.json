@@ -1,38 +1,39 @@
 {
-  "id": "AAAAAAAANVAAB6gT1Vjdt0IC7DdJIggGdB-P_FWAkouk6RLqI_dAWH1p",
+  "id": "AAAAAAAANyUAB7aECtmUJzlIACJ4zw0dzokGlACWP42W6D5y7LyLmj_U",
   "loan_id": null,
   "state": "completed",
-  "price": { "currency": "USD", "amount": "42.95" },
-  "turnaround_time": {
-    "lower_bound": "20",
-    "upper_bound": "124",
-    "best_estimate": "48"
+  "price": {
+    "currency": "USD",
+    "amount": "23.00"
   },
-  "created": "2022-03-21T18:32:18.852722Z",
+  "turnaround_time": {},
+  "created": "2022-03-22T17:08:44.819814Z",
   "date_of_completion": null,
   "target": {
     "first_name": "Jane",
     "last_name": "Doe",
     "contact_email": "user@example.com",
     "social_security_number": "***-**-0000",
-    "company": { "id": 1, "name": "Truework - DEMO" },
+    "company": {
+      "name": null
+    },
     "date_of_birth": "2019-08-24"
   },
   "permissible_purpose": "child-support",
   "type": "employment-income",
   "reports": [
     {
-      "id": "AAAAAAAAJD4AC37x741EokS43re4FZrFf_jA9AhQx3dJhISjT4XYYxpB",
-      "created": "2022-03-21T18:32:19.387082Z",
-      "current_as_of": "2020-07-01",
+      "id": "AAAAAAAAJI0AC3MBYybomxadwASXwzB-S2sxgRnEoNuR1vrsh4zEve7g",
+      "created": "2022-03-22T17:08:45.042322Z",
+      "current_as_of": "2022-02-19",
       "verification_request": {
-        "id": "AAAAAAAANVAAB6gT1Vjdt0IC7DdJIggGdB-P_FWAkouk6RLqI_dAWH1p",
+        "id": "AAAAAAAANyUAB7aECtmUJzlIACJ4zw0dzokGlACWP42W6D5y7LyLmj_U",
         "type": "employment-income",
-        "created": "2022-03-21T18:32:18.852722Z"
+        "created": "2022-03-22T17:08:44.819814Z"
       },
       "employer": {
-        "name": "Truework - DEMO",
-        "address": "901 Smith Terrace\nHicksside, AL 11615, Coryfort, AK 70466"
+        "name": "Fake Company",
+        "address": "689 Jennifer Villages Apt. 033\nDuffyshire, AZ 02444, Port Jorge, TX 04201"
       },
       "employee": {
         "first_name": "Jane",
@@ -88,12 +89,18 @@
   ],
   "use_case": "mortgage",
   "request_parameters": {
-    "employer_filter": "target-employer",
+    "employer_filter": "all-employers",
     "automated_underwriting_system_eligibility": "not-required",
     "verification_methods": {
-      "instant": { "enabled": true },
-      "credentials": { "enabled": false },
-      "smart_outreach": { "enabled": false }
+      "instant": {
+        "enabled": true
+      },
+      "credentials": {
+        "enabled": false
+      },
+      "smart_outreach": {
+        "enabled": false
+      }
     }
   },
   "reseller_originating_party": null
