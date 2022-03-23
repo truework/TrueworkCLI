@@ -2,9 +2,9 @@
   "type": "employment-income",
   "permissible_purpose": "child-support",
   "target": {
-    "social_security_number": "000-10-0001",
-    "first_name": "Jane",
-    "last_name": "Doe",
+    "social_security_number": "000-00-0001",
+    "first_name": "Completed",
+    "last_name": "Verification",
     "contact_email": "user@example.com",
     "date_of_birth": "2019-08-24"
   },

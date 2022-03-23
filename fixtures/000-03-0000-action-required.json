@@ -3,9 +3,6 @@
   "permissible_purpose": "child-support",
   "target": {
     "social_security_number": "000-03-0000",
-    "company": {
-      "id": 1
-    },
     "first_name": "Action",
     "last_name": "Required",
     "contact_email": "user@example.com",

@@ -1,25 +1,12 @@
 {
-  "type": "employment",
-  "permissible_purpose": "risk-assessment",
+  "type": "employment-income",
+  "permissible_purpose": "child-support",
   "target": {
-    "first_name": "Joe",
-    "last_name": "Smith",
     "social_security_number": "000-00-0000",
-    "contact_email": "joesmith@example.org",
-    "company": {
-      "name": "Example Inc."
-    }
+    "first_name": "Completed",
+    "last_name": "Verification",
+    "contact_email": "user@example.com",
+    "date_of_birth": "2019-08-24"
   },
-  "documents": [],
-  "request_parameters": {
-    "employer_filter": "target-employer",
-    "verification_methods": {
-      "instant": {
-        "enabled": true
-      },
-      "smart_outreach": {
-        "enabled": true
-      }
-    }
-  }
+  "use_case": "mortgage"
 }
