@@ -6,7 +6,7 @@
   "author": "Felix Sargent",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.26.1",
+    "@truework/sdk": "^1.5.0",
     "commander": "^9.0.0",
     "dotenv": "^16.0.0",
     "inquirer": "^8.2.1",
@@ -30,6 +30,7 @@
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^6.0.0",
     "jest": "^27.5.1",
     "prettier": "^2.6.0"
   }

@@ -21,35 +21,41 @@ if (!process.env.TW_TOKEN) {
   process.exit(1)
 }
 
-const evalEnv = (cmd) => {
-  if (cmd.optsWithGlobals().production) {
-    if (!process.env.TW_TOKEN_PROD) {
-      console.error(
-        'TW_TOKEN_PROD environment variable is not set\nPlease define one in .env or $ trueworkapi TW_TOKEN_PROD=<token>'
-      )
-      process.exit(1)
-    }
-    process.env.TW_TOKEN = process.env.TW_TOKEN_PROD
-    console.log('Using production environment')
-    program.setOptionValue('environment', 'https://api.truework.com')
-  } else {
-    program.setOptionValue('environment', 'https://api.truework-sandbox.com')
-    // program.setOptionValue('environment', 'http://localhost:8000/external-api')
-  }
-}
 program
   .option('-v, --verbose', 'Verbose output')
-  .addOption(
-    new Option('-p, --production', 'Use production environment').env(
-      'TWCLI_PROD'
-    )
-  )
+  .option('-p, --production', 'Use production environment')
   .description(
     'CLI for Truework\nDefine API key in .env or TW_TOKEN=<token>\nDefault env is Staging. Use --production to use production'
   )
+  .option('-t, --trace', 'display trace statements for commands')
+  .hook('preAction', (thisCommand, actionCommand) => {
+    if (thisCommand.opts().trace) {
+      console.log(
+        `About to call action handler for subcommand: ${actionCommand.name()}`
+      )
+      console.log('arguments: %O', actionCommand.args)
+      console.log('options: %o', actionCommand.opts())
+    }
+  })
+  .hook('preAction', () => {
+    // I really hate this, but I I can't figure out how to initialize twcli's environment parameter in the preAction hook
+    if (program.optsWithGlobals().production) {
+      if (!process.env.TW_TOKEN_PROD) {
+        console.error(
+          'TW_TOKEN_PROD environment variable is not set\nPlease define one in .env or $ trueworkapi TW_TOKEN_PROD=<token>'
+        )
+        process.exit(1)
+      }
+      process.env.TW_TOKEN = process.env.TW_TOKEN_PROD
+      process.env.production = true
+      console.log('Using production environment')
+      program.setOptionValue('environment', 'https://api.truework.com')
+    } else {
+      program.setOptionValue('environment', 'https://api.truework-sandbox.com')
+    }
+  })
 
 program.action((options, cmd) => {
-  evalEnv(cmd)
   mainPrompt(options, cmd)
 })
 
@@ -69,7 +75,6 @@ program
   .option('-l, --limit <limit>', 'Limit the number of results', '10')
   .option('-o, --offset <offset>', 'Offset the results', '0')
   .action((options, cmd) => {
-    evalEnv(cmd)
     listVerifications(options, cmd)
   })
 
@@ -77,13 +82,13 @@ program
 program
   .command('get')
   .argument('<verification_id>')
-  .action((verification_id, options, cmd) => {
+  .action(async (verification_id, options, cmd) => {
     if (verification_id.length !== 56) {
       console.error('Please enter a valid verification ID')
       process.exit(1)
     }
-    evalEnv(cmd)
-    getVerification(verification_id, options, cmd)
+
+    await getVerification(verification_id, options, cmd)
   })
 
 // Create Verifications
@@ -125,7 +130,6 @@ program
   .option('--email [email]', 'Email')
   .option('--phone [phone]', 'Phone')
   .action((options, cmd) => {
-    evalEnv(cmd)
     createVerification(options, cmd)
   })
 
@@ -135,7 +139,6 @@ program
   .arguments('<file>')
   .option('-s, --sync', 'Sync Verification (Instant Response)')
   .action((filePath, options, cmd) => {
-    evalEnv(cmd)
     importFile(filePath, options, cmd)
   })
 
@@ -146,7 +149,6 @@ program
   .option('-l, --limit', 'Limit the number of results', '25')
   .option('--offset')
   .action((company_name, options, cmd) => {
-    evalEnv(cmd)
     getCompany(company_name, options, cmd)
   })
 
@@ -171,7 +173,6 @@ program
     ])
   )
   .action((verification_id, options, cmd) => {
-    evalEnv(cmd)
     cancelVerification(verification_id, options, cmd)
   })
 
@@ -181,7 +182,6 @@ program
   .argument('<verification_id>')
   .argument('<report_id>')
   .action((verification_id, report_id, options, cmd) => {
-    evalEnv(cmd)
     reverifyVerification(verification_id, report_id, options, cmd)
   })
 
