@@ -38,7 +38,6 @@ program
     }
   })
   .hook('preAction', () => {
-    // I really hate this, but I I can't figure out how to initialize twcli's environment parameter in the preAction hook
     if (program.optsWithGlobals().production) {
       if (!process.env.TW_TOKEN_PROD) {
         console.error(
