@@ -3,19 +3,14 @@ const moment = require('moment')
 var inquirer = require('inquirer')
 const fs = require('fs')
 
-const {
-  truework,
-  ENVIRONMENT,
-  REQUEST_SYNC_STRATEGIES,
-} = require('@truework/sdk')
+const { truework, REQUEST_SYNC_STRATEGIES } = require('@truework/sdk')
 
 const getVerification = async (verification_id, options, cmd) => {
   // I really hate tw being initalized for each function, but I can't figure out to ensure it's initalized with the right environment
+
   const tw = truework({
+    baseURL: cmd.optsWithGlobals().baseURL,
     token: process.env.TW_TOKEN,
-    environment: process.env.production
-      ? ENVIRONMENT.PRODUCTION
-      : ENVIRONMENT.SANDBOX,
   })
   try {
     const response = await tw.verifications.getOne({ id: verification_id })
@@ -25,17 +20,19 @@ const getVerification = async (verification_id, options, cmd) => {
       prettyPrintVerification(response.body)
     }
   } catch (err) {
-    console.log(err.response.statusCode) // error response status code
-    console.log(err.response.body) // error response body
+    console.log(err?.response?.statusCode) // error response status code
+    console.log(err?.response?.body) // error response body
+    if (cmd.optsWithGlobals().verbose) {
+      console.dir(err) // error 
+      console.dir(cmd.optsWithGlobals()) // error request
+    }
   }
 }
 
 const listVerifications = async (options, cmd) => {
   const tw = truework({
+    baseURL: cmd.optsWithGlobals().baseURL,
     token: process.env.TW_TOKEN,
-    environment: process.env.production
-      ? ENVIRONMENT.PRODUCTION
-      : ENVIRONMENT.SANDBOX,
   })
   try {
     const params = {
@@ -65,17 +62,20 @@ const listVerifications = async (options, cmd) => {
       }
     }
   } catch (err) {
-    console.log(err.response.statusCode) // error response status code
-    console.log(err.response.body) // error response body
+
+    // console.log(err?.response?.statusCode) // error response status code
+    // console.log(err?.response?.body) // error response body
+    if (cmd.optsWithGlobals().verbose) {
+      console.dir(err) // error 
+      console.dir(cmd.optsWithGlobals()) // error request
+    }
   }
 }
 
 const selectVerification = async (options, cmd) => {
   const tw = truework({
     token: process.env.TW_TOKEN,
-    environment: process.env.production
-      ? ENVIRONMENT.PRODUCTION
-      : ENVIRONMENT.SANDBOX,
+    baseURL: cmd.optsWithGlobals().baseURL,
   })
   const params = {
     limit: parseInt(options.limit || 10),
@@ -125,9 +125,7 @@ const selectVerification = async (options, cmd) => {
 const createVerification = async (options, cmd) => {
   const tw = truework({
     token: process.env.TW_TOKEN,
-    environment: process.env.production
-      ? ENVIRONMENT.PRODUCTION
-      : ENVIRONMENT.SANDBOX,
+    baseURL: cmd.optsWithGlobals().baseURL,
   })
   let verification = {
     type: options.type,
@@ -191,9 +189,7 @@ const createVerification = async (options, cmd) => {
 const importFile = async (filePath, options, cmd) => {
   const tw = truework({
     token: process.env.TW_TOKEN,
-    environment: process.env.production
-      ? ENVIRONMENT.PRODUCTION
-      : ENVIRONMENT.SANDBOX,
+    baseURL: cmd.optsWithGlobals().baseURL,
   })
   let data = ''
   try {
@@ -233,9 +229,7 @@ const importFile = async (filePath, options, cmd) => {
 const getCompany = async (company_name, options, cmd) => {
   const tw = truework({
     token: process.env.TW_TOKEN,
-    environment: process.env.production
-      ? ENVIRONMENT.PRODUCTION
-      : ENVIRONMENT.SANDBOX,
+    baseURL: cmd.optsWithGlobals().baseURL,
   })
   let params = {
     query: company_name,
@@ -280,9 +274,7 @@ const getCompany = async (company_name, options, cmd) => {
 const cancelVerification = async (verification_id, options, cmd) => {
   const tw = truework({
     token: process.env.TW_TOKEN,
-    environment: process.env.production
-      ? ENVIRONMENT.PRODUCTION
-      : ENVIRONMENT.SANDBOX,
+    baseURL: cmd.optsWithGlobals().baseURL,
   })
   try {
     const { body } = await tw.verifications.cancel({

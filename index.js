@@ -23,7 +23,13 @@ if (!process.env.TW_TOKEN) {
 
 program
   .option('-v, --verbose', 'Verbose output')
-  .option('-p, --production', 'Use production environment')
+  .addOption(
+    new Option('--environment <environment>', 'Use environment').choices([
+      'production',
+      'local',
+      'staging',
+    ])
+  )
   .description(
     'CLI for Truework\nDefine API key in .env or TW_TOKEN=<token>\nDefault env is Staging. Use --production to use production'
   )
@@ -38,7 +44,21 @@ program
     }
   })
   .hook('preAction', () => {
-    if (program.optsWithGlobals().production) {
+    if (!program.optsWithGlobals().environment) {
+      program.setOptionValue('baseURL', 'https://api.truework-sandbox.com/')
+    }
+    if (program.optsWithGlobals().environment === 'local') {
+      if (!process.env.TW_TOKEN_LOCAL) {
+        console.error(
+          'TW_TOKEN_LOCAL environment variable is not set\nPlease define one in .env or $ trueworkapi TW_TOKEN_LOCAL=<token>'
+        )
+        process.exit(1)
+      }
+      console.log('Using local environment')
+      process.env.TW_TOKEN = process.env.TW_TOKEN_LOCAL
+      program.setOptionValue('baseURL', 'http://localhost:8000/')
+    }
+    if (program.optsWithGlobals().environment === 'production') {
       if (!process.env.TW_TOKEN_PROD) {
         console.error(
           'TW_TOKEN_PROD environment variable is not set\nPlease define one in .env or $ trueworkapi TW_TOKEN_PROD=<token>'
@@ -46,11 +66,8 @@ program
         process.exit(1)
       }
       process.env.TW_TOKEN = process.env.TW_TOKEN_PROD
-      process.env.production = true
       console.log('Using production environment')
-      program.setOptionValue('environment', 'https://api.truework.com')
-    } else {
-      program.setOptionValue('environment', 'https://api.truework-sandbox.com')
+      program.setOptionValue('baseURL', 'https://api.truework.com/')
     }
   })
 

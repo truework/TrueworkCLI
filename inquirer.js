@@ -143,11 +143,10 @@ const createPrompt = async (options, cmd) => {
       name: 'company',
       message: `'Target's Company'`,
       validate: (input) => {
-        if (input.length) {
-          return true
-        } else {
+        if (!input.length) {
           return 'Please enter a company name'
         }
+        return true
       },
     },
     {
