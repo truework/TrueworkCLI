@@ -1,0 +1,34 @@
+{
+  "id": "AAAAAAAANxIABxicfIO3p7XoXPRmVcJmcxTgNilcn61Q26q-UEV4Cem4",
+  "loan_id": null,
+  "state": "canceled",
+  "price": { "currency": "USD", "amount": "42.95" },
+  "turnaround_time": {
+    "lower_bound": "20",
+    "upper_bound": "124",
+    "best_estimate": "48"
+  },
+  "created": "2022-03-22T16:52:30.629773Z",
+  "date_of_completion": null,
+  "target": {
+    "first_name": "Cancelled",
+    "last_name": "Doe",
+    "contact_email": "user@example.com",
+    "social_security_number": "***-**-0000",
+    "company": { "id": 1, "name": "Truework - DEMO" },
+    "date_of_birth": "2019-08-24"
+  },
+  "permissible_purpose": "child-support",
+  "type": "employment-income",
+  "use_case": "mortgage",
+  "request_parameters": {
+    "employer_filter": "target-employer",
+    "automated_underwriting_system_eligibility": "not-required",
+    "verification_methods": {
+      "instant": { "enabled": true },
+      "credentials": { "enabled": true },
+      "smart_outreach": { "enabled": true }
+    }
+  },
+  "reseller_originating_party": null
+}

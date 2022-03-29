@@ -1,0 +1,41 @@
+{
+  "id": "AAAAAAAANxUABzURUJUhKxb7YieVOOB-KTYEvA7Z9qLxNDppIAtzZP6H",
+  "loan_id": null,
+  "state": "action-required",
+  "price": {
+    "currency": "USD",
+    "amount": "23.00"
+  },
+  "turnaround_time": {},
+  "created": "2022-03-22T16:57:45.462329Z",
+  "date_of_completion": null,
+  "target": {
+    "first_name": "Action",
+    "last_name": "Required",
+    "contact_email": "user@example.com",
+    "social_security_number": "***-**-0000",
+    "company": {
+      "name": null
+    },
+    "date_of_birth": "2019-08-24"
+  },
+  "permissible_purpose": "child-support",
+  "type": "employment-income",
+  "use_case": "mortgage",
+  "request_parameters": {
+    "employer_filter": "all-employers",
+    "automated_underwriting_system_eligibility": "not-required",
+    "verification_methods": {
+      "instant": {
+        "enabled": true
+      },
+      "credentials": {
+        "enabled": false
+      },
+      "smart_outreach": {
+        "enabled": false
+      }
+    }
+  },
+  "reseller_originating_party": null
+}
