@@ -136,6 +136,7 @@ program
       ])
       .default('credit-application')
   )
+  .option('-s, --sync', 'Sync Verification (Instant Response)', true)
   .option('--instant', 'Instant Verification', true)
   .option(' --credentials', 'Credentials Verification')
   .option('--smart-outreach', 'Smart Outreach Verification')
@@ -153,7 +154,7 @@ program
   .command('import')
   .description('Import Verification')
   .arguments('<file>')
-  .option('-s, --sync', 'Sync Verification (Instant Response)')
+  .option('-s, --sync', 'Sync Verification (Instant Response)', true)
   .action((filePath, options, cmd) => {
     importFile(filePath, options, cmd)
   })

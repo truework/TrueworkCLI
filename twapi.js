@@ -14,17 +14,14 @@ const getVerification = async (verification_id, options, cmd) => {
   })
   try {
     const response = await tw.verifications.getOne({ id: verification_id })
+    prettyPrintVerification(response.body)
     if (cmd.optsWithGlobals().verbose) {
-      console.dir(response, { depth: null, colors: true })
-    } else {
-      prettyPrintVerification(response.body)
+      verbose(response)
     }
   } catch (err) {
-    console.log(err?.response?.statusCode) // error response status code
-    console.log(err?.response?.body) // error response body
+    verbose(err.response)
     if (cmd.optsWithGlobals().verbose) {
-      console.dir(err) // error 
-      console.dir(cmd.optsWithGlobals()) // error request
+      console.dir(err) // error
     }
   }
 }
@@ -40,34 +37,28 @@ const listVerifications = async (options, cmd) => {
       offset: parseInt(options.offset || 0),
       state: options.state || '',
     }
-    const { body } = await tw.verifications.get(params)
-    if (cmd.optsWithGlobals) {
-      if (cmd.optsWithGlobals().verbose) {
-        console.log(cmd.optsWithGlobals())
-        console.dir(body, { depth: null, colors: true })
-      } else {
-        prettyPrintVerification(body.results)
-      }
-      // Pagination
-      if (params.offset + params.limit < body.count) {
-        term.red(`Items: ${params.offset}-${params.offset + params.limit}\n`)
-        const answers = await inquirer.prompt([
-          { type: 'confirm', name: 'nextPage', message: 'Next Page?' },
-        ])
-        if (answers.nextPage == true) {
-          options.limit = params.limit
-          options.offset = params.offset + params.limit
-          listVerifications(options, cmd)
-        }
+    const response = await tw.verifications.get(params)
+    if (cmd.optsWithGlobals().verbose) {
+      verbose(response)
+    } else {
+      prettyPrintVerification(response.body.results)
+    }
+    // Pagination
+    if (params.offset + params.limit < response.body.count) {
+      term.red(`Items: ${params.offset}-${params.offset + params.limit}\n`)
+      const answers = await inquirer.prompt([
+        { type: 'confirm', name: 'nextPage', message: 'Next Page?' },
+      ])
+      if (answers.nextPage == true) {
+        options.limit = params.limit
+        options.offset = params.offset + params.limit
+        listVerifications(options, cmd)
       }
     }
   } catch (err) {
-
-    // console.log(err?.response?.statusCode) // error response status code
-    // console.log(err?.response?.body) // error response body
+    verbose(err.response)
     if (cmd.optsWithGlobals().verbose) {
-      console.dir(err) // error 
-      console.dir(cmd.optsWithGlobals()) // error request
+      console.dir(err) // error
     }
   }
 }
@@ -165,23 +156,24 @@ const createVerification = async (options, cmd) => {
     verification.request_parameters.verification_methods.smart_outreach.enabled = true
   }
   try {
-    const { data } = await tw.verifications.create(verification)
+    const response = await tw.verifications.create(
+      verification,
+      options.sync
+        ? {
+            strategy: REQUEST_SYNC_STRATEGIES.SYNC,
+          }
+        : null
+    )
+    prettyPrintVerification(response.body)
     if (cmd.optsWithGlobals().verbose) {
-      console.dir(data, { depth: null, colors: true })
-    } else {
-      prettyPrintVerification(data)
+      verbose(response)
     }
   } catch (err) {
-    if (err.response.status === 400) {
-      console.dir(err.response.status, { depth: null, colors: true })
-      console.dir(err.response.headers, { depth: null, colors: true })
-      console.dir(err.response.data, { depth: null, colors: true })
-      if (cmd.optsWithGlobals().verbose) {
-        console.dir(err.response.config, { depth: null, colors: true })
-      }
-    } else {
-      console.log(err.response.statusCode) // error response status code
-      console.log(err.response.body) // error response body
+    console.dir(verification, { depth: null, colors: true }) // request body
+
+    verbose(err.response) // response
+    if (cmd.optsWithGlobals().verbose) {
+      console.dir(err) // error
     }
   }
 }
@@ -195,18 +187,11 @@ const importFile = async (filePath, options, cmd) => {
   try {
     data = JSON.parse(fs.readFileSync(filePath, 'utf8'))
   } catch (err) {
-    console.log(err.response.statusCode) // error response status code
-    console.log(err.response.body) // error response body
+    console.error(err)
     process.exit(1)
   }
-  const headers = {
-    Accept: 'application/json; version=2020-12-07',
-    'Content-Type': 'application/json;charset=UTF-8',
-    Authorization: `Bearer ${process.env.TW_TOKEN}`,
-  }
-  headers['Request-Sync'] = 'sync'
   try {
-    const resp = await tw.verifications.create(
+    const response = await tw.verifications.create(
       data,
       options.sync
         ? {
@@ -214,15 +199,15 @@ const importFile = async (filePath, options, cmd) => {
           }
         : null
     )
-
+    prettyPrintVerification(response.body)
     if (cmd.optsWithGlobals().verbose) {
-      console.dir(resp.body, { depth: null, colors: true })
-    } else {
-      prettyPrintVerification(resp.body)
+      verbose(response)
     }
   } catch (err) {
-    console.log(err.response.statusCode) // error response status code
-    console.log(err.response.body) // error response body
+    verbose(err.response)
+    if (cmd.optsWithGlobals().verbose) {
+      console.dir(err) // error
+    }
   }
 }
 
@@ -247,13 +232,6 @@ const getCompany = async (company_name, options, cmd) => {
     term.table([headers].concat(values), {
       firstRowTextAttr: { bgColor: 'gray' },
     })
-    // body.results.forEach((company) => {
-    //   term(`${company.id}\t`)
-    //   term.bold(`${company.name}`)
-    //   term(" - ")
-    //   term(`${company.domain}`)
-    //   term("\n")
-    // })
     if (params.offset + params.limit < body.count) {
       term.red(`Items: ${params.offset}-${params.offset + params.limit}\n`)
       const answers = await inquirer.prompt([
@@ -266,8 +244,7 @@ const getCompany = async (company_name, options, cmd) => {
       }
     }
   } catch (err) {
-    console.log(err.response.statusCode) // error response status code
-    console.log(err.response.body) // error response body
+    verbose(err.response)
   }
 }
 
@@ -282,14 +259,12 @@ const cancelVerification = async (verification_id, options, cmd) => {
       cancellation_reason: options.reason,
       cancellation_details: options.details,
     })
-
+    prettyPrintVerification(body)
     if (cmd.optsWithGlobals().verbose) {
       console.dir(body, { depth: null, colors: true })
-    } else {
-      prettyPrintVerification(body)
     }
   } catch (err) {
-    console.dir(err, { depth: null, colors: true })
+    verbose(err.response)
   }
 }
 
@@ -300,18 +275,21 @@ const reverifyVerification = async (
   cmd
 ) => {
   try {
+    const tw = truework({
+      token: process.env.TW_TOKEN,
+      baseURL: cmd.optsWithGlobals().baseURL,
+    })
     const { body } = await tw.verificationsrever({
       id: verification_id,
       report_id: report_id,
     })
+    prettyPrintVerification(body)
+
     if (cmd.optsWithGlobals().verbose) {
       console.dir(body, { depth: null, colors: true })
-    } else {
-      prettyPrintVerification(body)
     }
   } catch (err) {
-    console.log(err.response.statusCode) // error response status code
-    console.log(err.response.body) // error response body
+    verbose(err.response)
   }
 }
 
@@ -430,3 +408,10 @@ const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
 })
+
+const verbose = (response) => {
+  console.dir(response?.request?.requestUrl, { depth: null, colors: true })
+  console.dir(response?.statusCode, { depth: null, colors: true })
+  console.dir(response?.headers, { depth: null, colors: true })
+  console.dir(response?.body, { depth: null, colors: true })
+}
